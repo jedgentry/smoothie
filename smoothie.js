@@ -228,6 +228,7 @@
    *   maxValue: undefined,                      // specify to clamp the upper y-axis to a given value
    *   maxValueScale: 1,                         // allows proportional padding to be added above the chart. for 10% padding, specify 1.1.
    *   minValueScale: 1,                         // allows proportional padding to be added below the chart. for 10% padding, specify 1.1.
+   *   showValueLabel: true,                      //show the last value on the graph in text form
    *   yRangeFunction: undefined,                // function({min: , max: }) { return {min: , max: }; }
    *   scaleSmoothing: 0.125,                    // controls the rate at which y-value zoom animation occurs
    *   millisPerPixel: 20,                       // sets the speed at which the chart pans by
@@ -284,8 +285,13 @@
     yMaxFormatter: function(max, precision) {
       return parseFloat(max).toFixed(precision);
     },
+    yFormatter: function(max, precision) {
+      return parseFloat(max).toFixed(precision);
+    },
     maxValueScale: 1,
     minValueScale: 1,
+    showValueLabel: true,
+    valueLabelFollowLine: true,
     interpolation: 'bezier',
     scaleSmoothing: 0.125,
     maxDataSetLength: 2,
@@ -567,7 +573,7 @@
     // Round time down to pixel granularity, so motion appears smoother.
     time -= time % this.options.millisPerPixel;
 
-    var context = canvas.getContext('2d'),
+    var context = canvas.getContext('2d', {alpha: false}),
         chartOptions = this.options,
         dimensions = { top: 0, left: 0, width: canvas.clientWidth, height: canvas.clientHeight },
         // Calculate the threshold time for the oldest data points.
@@ -730,7 +736,7 @@
         lastX = x; lastY = y;
       }
 
-      if (dataSet.length > 1) {
+     if (dataSet.length > 1) {
         if (seriesOptions.fillStyle) {
           // Close up the fill region.
           context.lineTo(dimensions.width + seriesOptions.lineWidth + 1, lastY);
@@ -745,6 +751,33 @@
         }
         context.closePath();
       }
+      //draw the value label
+      if(chartOptions.showValueLabel && dataSet.length > 1)
+      {
+        context.fillStyle = seriesOptions.strokeStyle || chartOptions.labels.fillStyle;
+        context.font = chartOptions.labels.fontSize*1.5 + 'px ' + chartOptions.labels.fontFamily
+        var val = dataSet[dataSet.length-1][1];
+        var labelString = chartOptions.yFormatter(val, chartOptions.labels.precision);
+        var fontSize = context.measureText(labelString);
+        fontSize.height =  chartOptions.labels.fontSize*1.5;
+        var labelPos = chartOptions.scrollBackwards ? 0 : dimensions.width - fontSize.width - 2;
+
+        seriesOptions.lastValLabely = seriesOptions.lastValLabely || (dimensions.height/2 - (fontSize.height + 2) * this.seriesSet.length/2 + (fontSize.height + 2 ) * (d + 0.5)) ;
+        //smoothly follow the line
+        if(chartOptions.valueLabelFollowLine ){
+          if(!seriesOptions.lastTimeLabely || (time - seriesOptions.lastTimeLabely > 16 && Math.abs(seriesOptions.lastValLabely - lastY) > 10))
+          {
+            //move by 1 pixel up or down
+            seriesOptions.lastValLabely = seriesOptions.lastValLabely + (seriesOptions.lastValLabely < lastY ? 1 : -1) ;
+
+            seriesOptions.lastTimeLabely = time
+          }
+        }
+
+
+        context.fillText(labelString, labelPos, seriesOptions.lastValLabely);
+      }
+
       context.restore();
     }
 
@@ -757,6 +790,7 @@
       context.fillStyle = chartOptions.labels.fillStyle;
       context.fillText(maxValueString, maxLabelPos, chartOptions.labels.fontSize);
       context.fillText(minValueString, minLabelPos, dimensions.height - 2);
+
     }
 
     // Display timestamps along x-axis at the bottom of the chart.

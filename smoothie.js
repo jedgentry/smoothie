@@ -755,11 +755,11 @@
       if(chartOptions.showValueLabel && dataSet.length > 1)
       {
         context.fillStyle = seriesOptions.strokeStyle || chartOptions.labels.fillStyle;
-        context.font = chartOptions.labels.fontSize*1.5 + 'px ' + chartOptions.labels.fontFamily
+        context.font = chartOptions.labels.fontSize + 'px ' + chartOptions.labels.fontFamily
         var val = dataSet[dataSet.length-1][1];
         var labelString = chartOptions.yFormatter(val, chartOptions.labels.precision);
         var fontSize = context.measureText(labelString);
-        fontSize.height =  chartOptions.labels.fontSize*1.5;
+        fontSize.height =  chartOptions.labels.fontSize;
         var labelPos = chartOptions.scrollBackwards ? 0 : dimensions.width - fontSize.width - 2;
 
         seriesOptions.lastValLabely = seriesOptions.lastValLabely || (dimensions.height/2 - (fontSize.height + 2) * this.seriesSet.length/2 + (fontSize.height + 2 ) * (d + 0.5)) ;

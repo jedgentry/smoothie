@@ -755,6 +755,7 @@
       if(chartOptions.showValueLabel && dataSet.length > 1)
       {
         context.fillStyle = seriesOptions.strokeStyle || chartOptions.labels.fillStyle;
+        context.strokeStyle = 'black';
         context.font = chartOptions.labels.fontSize + 'px ' + chartOptions.labels.fontFamily
         var val = dataSet[dataSet.length-1][1];
         var labelString = chartOptions.yFormatter(val, chartOptions.labels.precision);
@@ -774,8 +775,9 @@
           }
         }
 
-
         context.fillText(labelString, labelPos, seriesOptions.lastValLabely);
+        context.lineWidth = chartOptions.labels.fontSize / 36;
+        context.strokeText(labelString, labelPos, seriesOptions.lastValLabely);
       }
 
       context.restore();

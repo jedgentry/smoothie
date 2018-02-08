@@ -698,9 +698,6 @@
         var offset = context.measureText(labelString).width - 2;
         if(this.textOffset[d] === undefined || offset > this.textOffset[d]) {
           this.textOffset[d] = offset;
-        } else if(this.textOffset[d] > offset) {
-          console.log("Down!")
-          this.textOffset[d] -= 0.0001;
         }
         x -= this.textOffset[d];
         if (i === 0) {

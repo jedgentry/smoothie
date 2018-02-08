@@ -692,7 +692,9 @@
       for (var i = 0; i < dataSet.length && dataSet.length !== 1; i++) {
         var x = timeToXPixel(dataSet[i][0]),
             y = valueToYPixel(dataSet[i][1]);
-
+        var val = dataSet[dataSet.length-1][1];
+        var labelString = chartOptions.yFormatter(val, chartOptions.labels.precision);
+        x -= context.measureText(labelString).width - 2;
         if (i === 0) {
           firstX = x;
           context.moveTo(x, y);
@@ -755,17 +757,15 @@
       if(chartOptions.showValueLabel && dataSet.length > 1)
       {
         context.fillStyle = seriesOptions.strokeStyle || chartOptions.labels.fillStyle;
-        context.strokeStyle = 'black';
         context.font = chartOptions.labels.fontSize + 'px ' + chartOptions.labels.fontFamily
         var val = dataSet[dataSet.length-1][1];
-        var labelString = chartOptions.yFormatter(val, chartOptions.labels.precision);
         var fontSize = context.measureText(labelString);
         fontSize.height =  chartOptions.labels.fontSize;
         var labelPos = chartOptions.scrollBackwards ? 0 : dimensions.width - fontSize.width - 2;
 
-        seriesOptions.lastValLabely = seriesOptions.lastValLabely || (dimensions.height/2 - (fontSize.height + 2) * this.seriesSet.length/2 + (fontSize.height + 2 ) * (d + 0.5)) ;
+        seriesOptions.lastValLabely = seriesOptions.lastValLabely || (dimensions.height / 2 - (fontSize.height + 2) * this.seriesSet.length / 2 + (fontSize.height + 2) * (d + 0.5)) ;
         //smoothly follow the line
-        if(chartOptions.valueLabelFollowLine ){
+        if(chartOptions.valueLabelFollowLine) {
           if(!seriesOptions.lastTimeLabely || (time - seriesOptions.lastTimeLabely > 16 && Math.abs(seriesOptions.lastValLabely - lastY) > 10))
           {
             //move by 1 pixel up or down
@@ -774,10 +774,7 @@
             seriesOptions.lastTimeLabely = time
           }
         }
-
         context.fillText(labelString, labelPos, seriesOptions.lastValLabely);
-        context.lineWidth = chartOptions.labels.fontSize / 36;
-        context.strokeText(labelString, labelPos, seriesOptions.lastValLabely);
       }
 
       context.restore();

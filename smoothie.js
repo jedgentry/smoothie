@@ -271,6 +271,7 @@
   function SmoothieChart(options) {
     this.options = Util.extend({}, SmoothieChart.defaultChartOptions, options);
     this.seriesSet = [];
+    this.textOffset = []
     this.currentValueRange = 1;
     this.currentVisMinValue = 0;
     this.lastRenderTimeMillis = 0;
@@ -694,7 +695,14 @@
             y = valueToYPixel(dataSet[i][1]);
         var val = dataSet[dataSet.length-1][1];
         var labelString = chartOptions.yFormatter(val, chartOptions.labels.precision);
-        x -= context.measureText(labelString).width - 2;
+        var offset = context.measureText(labelString).width - 2;
+        if(this.textOffset[d] === undefined || offset > this.textOffset[d]) {
+          this.textOffset[d] = offset;
+        } else if(this.textOffset[d] > offset) {
+          console.log("Down!")
+          this.textOffset[d] -= 0.0001;
+        }
+        x -= this.textOffset[d];
         if (i === 0) {
           firstX = x;
           context.moveTo(x, y);
@@ -734,7 +742,9 @@
             }
           }
         }
-
+        if(this.textOffset[d] > offset) {
+          this.textOffset[d] -= (this.textOffset[d] - offset) / (this.seriesSet.length === 0 ? 1 : this.seriesSet.length * 16);
+        }
         lastX = x; lastY = y;
       }
 
